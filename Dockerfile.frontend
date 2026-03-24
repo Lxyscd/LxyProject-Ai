@@ -1,0 +1,24 @@
+# 构建阶段
+FROM node:20-slim AS build
+WORKDIR /app
+# 安装依赖
+COPY package*.json ./
+RUN npm install
+# 复制所有文件并构建前端
+COPY . .
+RUN npm run build
+
+# 运行阶段
+FROM node:20-slim
+WORKDIR /app
+# 复制 package.json 并安装生产环境依赖
+COPY --from=build /app/package*.json ./
+RUN npm install --production
+# 复制构建好的前端静态文件和服务器脚本
+COPY --from=build /app/frontend/dist ./frontend/dist
+COPY --from=build /app/server.ts ./
+# 安装 tsx 以运行 TypeScript 脚本
+RUN npm install -g tsx
+EXPOSE 3000
+# 启动前端服务
+CMD ["tsx", "server.ts"]
