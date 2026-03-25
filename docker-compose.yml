@@ -18,13 +18,24 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ai_photography?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: lxy15319054561xy
+      SPRING_DATASOURCE_PASSWORD: root
       ZHIPU_API_KEY: ${ZHIPU_API_KEY}
       QWEN_API_KEY: ${QWEN_API_KEY}
+      NIMA_SERVICE_URL: http://python-model:5000
     ports:
       - "8080:8080"
     depends_on:
       - mysql
+      - python-model
+
+  python-model:
+    build:
+      context: ./nima_training
+      dockerfile: Dockerfile.python
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./nima_training/nima_saved_model:/app/nima_saved_model
 
   frontend:
     build:
